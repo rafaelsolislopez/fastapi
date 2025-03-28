@@ -1,4 +1,4 @@
-from user import User
+import users
 
 class MockUsers():
     def __init__(self):
@@ -9,5 +9,8 @@ class MockUsers():
     def get_user_list(self)->list:
         user_list=[self.user1,self.user2,self.user3]
         return user_list
-
+    
+    def new_user(self,id:int)->User:
+        self.user=User(id=id,name=f"Name{id}",mail="name{id}@mail.com",age=id*5)
+        return self.user
     
