@@ -36,15 +36,15 @@ DEELTE: borrado de datos
 """
 router=APIRouter()
 #Mock sample list users
-user_list=MockUsers().get_user_list()
+users_list=MockUsers().get_user_list()
 #for user in user_list:
 #    print(user)
 
 
-def searh_user(id:int):
+def search_user(id:int):
     try:
         logging.info("searching user")
-        user=list(filter(lambda user:user.id==id,user_list))
+        user=list(filter(lambda user:user.id==id,users_list))
         if len(user)>0:
             return list(user)[0]
         else:
@@ -54,16 +54,19 @@ def searh_user(id:int):
         return {"detail":"error searching user"}
 
 
-@router.get("/users",response_model=User,status_code=201 )
+@router.get("/users",status_code=201 )
 async def users():
-    return user_list  
+    logging.info("getting users")
+    return users_list
+    logging.error("error getting users")
+    raise HTTPException(status_code=404, detail="user not found")
 
 
 @router.get("/user",response_model=User,status_code=201 )
 async def user(id:int):
     try:
          logging.info("getting user")
-         user=searh_user(id)
+         user=search_user(id)
          return user
     except Exception as e:
         logging.info(f"error getting user:{e}")
@@ -71,17 +74,42 @@ async def user(id:int):
    
   
 
-@router.post("/adduser")
+@router.post("/adduser",response_model=User,status_code=201 )
 async def add_user(user:User):
-    pass
+    if type (search_user(id=user.id))!= User:
+        logging.info("adding user")
+        users_list.append(user)
+        return user
+    else:
+        raise   HTTPException(status_code=404, detail="user already exists")
 
 
-@router.put("/updateduser")
-async def update_user(id:int):
-    pass
 
-@router.delete("/deleteduser")
-async def delete_user():
-    pass
 
-print(searh_user(id=1))
+@router.put("/updateuser")
+async def update_user(user:User):
+    found=False
+    for index, saved_user in enumerate(users_list):
+        if saved_user.id == user.id:
+            users_list[index] = user
+            found = True
+            logging.info("updating user")
+            return user
+    if not found:
+        logging.error("error updating user")
+        raise HTTPException(status_code=404, detail="user not found")
+
+
+
+@router.delete("/deleteuser")
+async def delete_user(user:User):
+    found=False
+    for index, saved_user in enumerate(users_list):
+        if saved_user.id == user.id:
+            del users_list[index]
+            found = True
+            logging.info("deleting user")
+            return {"user":user,"status":"deleted"}
+    if not found:
+        logging.error("error deleting user")
+        raise HTTPException(status_code=404, detail="user not found")
