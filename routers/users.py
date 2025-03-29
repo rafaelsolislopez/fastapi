@@ -34,7 +34,7 @@ GET:lectura de datos
 PUT:actualización de datos
 DEELTE: borrado de datos
 """
-router=APIRouter()
+router=APIRouter(prefix="users",tags=["users"],response={"404": {"description": "Not found"}})
 #Mock sample list users
 users_list=MockUsers().get_user_list()
 #for user in user_list:
